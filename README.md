@@ -1,4 +1,4 @@
-# Lexio
+# Glosso
 
 Read foreign-language books and translate any word instantly with a click.
 

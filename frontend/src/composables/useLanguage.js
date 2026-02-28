@@ -12,7 +12,7 @@ export const LANGUAGES = [
   { code: 'PT', flag: '🇵🇹', label: 'Português' },
 ]
 
-const targetLang = ref(localStorage.getItem('targetLang') || 'EN')
+export const targetLang = ref(localStorage.getItem('targetLang') || 'EN')
 
 watch(targetLang, (v) => localStorage.setItem('targetLang', v))
 

@@ -13,17 +13,17 @@ const query = ref('')
 const lang = ref('de')
 const books = ref([])
 const loading = ref(false)
-const importing = ref(null) // book id being imported
+const importing = ref(null)
 const error = ref(null)
 
 const SEARCH_LANGS = [
-  { code: 'de', flag: '🇩🇪', label: 'German' },
-  { code: 'en', flag: '🇬🇧', label: 'English' },
-  { code: 'fr', flag: '🇫🇷', label: 'French' },
-  { code: 'es', flag: '🇪🇸', label: 'Spanish' },
-  { code: 'it', flag: '🇮🇹', label: 'Italian' },
-  { code: 'ru', flag: '🇷🇺', label: 'Russian' },
-  { code: 'pt', flag: '🇵🇹', label: 'Portuguese' },
+  { code: 'de', flag: '\u{1F1E9}\u{1F1EA}', label: 'German' },
+  { code: 'en', flag: '\u{1F1EC}\u{1F1E7}', label: 'English' },
+  { code: 'fr', flag: '\u{1F1EB}\u{1F1F7}', label: 'French' },
+  { code: 'es', flag: '\u{1F1EA}\u{1F1F8}', label: 'Spanish' },
+  { code: 'it', flag: '\u{1F1EE}\u{1F1F9}', label: 'Italian' },
+  { code: 'ru', flag: '\u{1F1F7}\u{1F1FA}', label: 'Russian' },
+  { code: 'pt', flag: '\u{1F1F5}\u{1F1F9}', label: 'Portuguese' },
 ]
 
 let debounceTimer = null
@@ -65,7 +65,7 @@ onMounted(() => search())
 </script>
 
 <template>
-  <main class="flex-1 flex flex-col">
+  <main class="flex-1 flex flex-col overflow-y-auto">
     <div class="max-w-4xl mx-auto w-full px-6 py-8 flex flex-col gap-6">
       <!-- Language picker -->
       <div class="flex items-center gap-1">
@@ -86,8 +86,8 @@ onMounted(() => search())
           v-model="query"
           @input="onInput"
           type="text"
-          :placeholder="`Search ${SEARCH_LANGS.find(l => l.code === lang)?.label} books…`"
-          class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          :placeholder="`Search ${SEARCH_LANGS.find(l => l.code === lang)?.label} books\u2026`"
+          class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-input-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 
@@ -105,7 +105,7 @@ onMounted(() => search())
           v-for="book in books"
           :key="book.id"
           :disabled="importing === book.id"
-          class="text-left border border-border rounded-lg p-4 hover:border-primary/40 hover:bg-muted/50 transition-colors flex flex-col gap-2 disabled:opacity-60"
+          class="text-left border border-border rounded-lg p-4 bg-card hover:border-primary/40 hover:bg-secondary transition-colors flex flex-col gap-2 disabled:opacity-60"
           @click="importBook(book)"
         >
           <div class="flex items-start gap-2">
@@ -116,7 +116,7 @@ onMounted(() => search())
             {{ book.authors.join(', ') || 'Unknown author' }}
           </p>
           <p class="text-xs text-muted-foreground mt-auto">
-            {{ importing === book.id ? 'Importing…' : `${book.download_count.toLocaleString()} downloads` }}
+            {{ importing === book.id ? 'Importing\u2026' : `${book.download_count.toLocaleString()} downloads` }}
           </p>
         </button>
       </div>

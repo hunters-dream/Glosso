@@ -35,7 +35,7 @@ async function onFileChange(e) {
 </script>
 
 <template>
-  <main class="flex-1 flex flex-col">
+  <main class="flex-1 flex flex-col overflow-y-auto">
     <!-- Hero -->
     <section class="flex-1 flex flex-col items-center justify-center gap-6 px-6 text-center py-20">
       <h1 class="text-4xl sm:text-5xl font-bold tracking-tight max-w-xl leading-tight">
@@ -61,7 +61,7 @@ async function onFileChange(e) {
     </section>
 
     <!-- Features -->
-    <section class="border-t border-border bg-muted/30">
+    <section class="border-t border-border bg-card">
       <div class="max-w-4xl mx-auto px-6 py-16 grid sm:grid-cols-3 gap-8">
         <div class="flex flex-col items-center text-center gap-3">
           <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">

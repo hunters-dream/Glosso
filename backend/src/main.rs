@@ -232,7 +232,9 @@ async fn main() {
         .layer(DefaultBodyLimit::max(100 * 1024 * 1024)) // 100 MB
         .layer(cors);
 
-    let port = std::env::var("BACKEND_PORT").unwrap_or_else(|_| "3000".into());
+    let port = std::env::var("PORT")
+        .or_else(|_| std::env::var("BACKEND_PORT"))
+        .unwrap_or_else(|_| "3000".into());
     let addr = format!("0.0.0.0:{port}");
     println!("Listening on {addr}");
 
