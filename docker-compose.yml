@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: lexio
-      POSTGRES_PASSWORD: lexio
-      POSTGRES_DB: lexio
+      POSTGRES_USER: Glosso
+      POSTGRES_PASSWORD: Glosso
+      POSTGRES_DB: Glosso
     ports:
       - "5432:5432"
     volumes:
