@@ -113,46 +113,42 @@ function startReading() {
       style="z-index: 0"
     />
 
-    <!-- Moon image -->
-    <img
-      src="/moon.png"
-      alt=""
-      class="pointer-events-none absolute opacity-20"
-      style="
-        width: min(50vw, 50vh);
-        height: min(50vw, 50vh);
-        object-fit: contain;
-        z-index: 1;
-      "
-    />
-
-    <!-- Main content -->
+    <!-- Main content — vertical stack -->
     <div class="relative flex flex-col items-center select-none" style="z-index: 2">
-      <!-- Diamond mark -->
-      <div class="mb-8">
-        <div
-          style="
-            width: 16px;
-            height: 16px;
-            background: #e03030;
-            transform: rotate(45deg);
-            box-shadow: 0 0 20px rgba(224,48,48,0.6), 0 0 60px rgba(224,48,48,0.15);
-          "
+
+      <!-- Moon + logo group (logo centered over moon) -->
+      <div class="relative flex items-center justify-center" style="width: min(50vw, 50vh); height: min(50vw, 50vh)">
+        <img
+          src="/moon.png"
+          alt=""
+          class="pointer-events-none absolute inset-0 w-full h-full object-contain opacity-20"
         />
+        <!-- Diamond + logo on top of moon -->
+        <div class="relative flex flex-col items-center">
+          <div class="mb-4">
+            <div
+              style="
+                width: 16px;
+                height: 16px;
+                background: #e03030;
+                transform: rotate(45deg);
+                box-shadow: 0 0 20px rgba(224,48,48,0.6), 0 0 60px rgba(224,48,48,0.15);
+              "
+            />
+          </div>
+          <h1 class="landing-logo">glosso</h1>
+        </div>
       </div>
 
-      <!-- Logo text -->
-      <h1 class="landing-logo">glosso</h1>
-
-      <!-- Domain -->
+      <!-- Text below moon -->
       <p
         style="
           font-family: var(--font-mono);
           font-size: 0.72rem;
           color: #2a2a2a;
           letter-spacing: 0.14em;
-          margin-top: 1rem;
-          margin-bottom: 3rem;
+          margin-top: 1.5rem;
+          margin-bottom: 2rem;
         "
       >glosso.space</p>
 
@@ -160,9 +156,9 @@ function startReading() {
       <div
         style="
           width: 1px;
-          height: 48px;
+          height: 36px;
           background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.12), transparent);
-          margin-bottom: 2.5rem;
+          margin-bottom: 1.5rem;
         "
       />
 
@@ -174,7 +170,7 @@ function startReading() {
           color: #333333;
           letter-spacing: 0.08em;
           text-align: center;
-          margin-bottom: 3.5rem;
+          margin-bottom: 2.5rem;
           text-transform: uppercase;
         "
       >Read. Discover. Remember.</p>
