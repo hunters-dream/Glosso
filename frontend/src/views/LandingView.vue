@@ -113,13 +113,15 @@ function startReading() {
       style="z-index: 0"
     />
 
-    <!-- Subtle radial glow -->
-    <div
-      class="pointer-events-none absolute rounded-full"
+    <!-- Moon image -->
+    <img
+      src="/moon.png"
+      alt=""
+      class="pointer-events-none absolute opacity-20"
       style="
-        width: 900px;
-        height: 900px;
-        background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 65%);
+        width: min(50vw, 50vh);
+        height: min(50vw, 50vh);
+        object-fit: contain;
         z-index: 1;
       "
     />
@@ -140,9 +142,7 @@ function startReading() {
       </div>
 
       <!-- Logo text -->
-      <h1
-        class="landing-logo"
-      >glosso</h1>
+      <h1 class="landing-logo">glosso</h1>
 
       <!-- Domain -->
       <p
