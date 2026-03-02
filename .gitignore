@@ -13,7 +13,7 @@ frontend/dist/
 .idea/
 .claude/
 .vscode/
-
+CLAUDE.md
 # Misc
 convo.txt
 misc/

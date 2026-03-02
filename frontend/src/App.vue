@@ -1,117 +1,252 @@
 <script setup>
-import { ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { BookOpen, Home, Library, PanelLeftClose, PanelLeft, Settings, HelpCircle } from 'lucide-vue-next'
-import { Badge } from '@/components/ui/badge'
-import LanguageSelector from '@/components/LanguageSelector.vue'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { BarChart2, Settings, HelpCircle, PanelLeftClose, PanelLeftOpen } from 'lucide-vue-next'
 import { useLanguage } from '@/composables/useLanguage.js'
 import { useWords } from '@/composables/useWords.js'
+import { useSidebar } from '@/composables/useSidebar.js'
+import { useSettings } from '@/composables/useSettings.js'
+import SettingsPanel from '@/components/SettingsPanel.vue'
 
-const { locale } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const { targetLang } = useLanguage()
-const { newCount, learningCount, knownCount } = useWords()
+const { words, newCount, learningCount, knownCount } = useWords()
+const { collapsed, toggle } = useSidebar()
+const { settingsOpen, settingsTab, openSettings, closeSettings } = useSettings()
 
-watch(targetLang, (v) => { locale.value = v.toLowerCase() }, { immediate: true })
-
-const collapsed = ref(false)
+const showSidebar = computed(() => route.path !== '/')
+const totalWords = computed(() => words.value.length)
+const knownPercent = computed(() =>
+  totalWords.value > 0 ? Math.round((knownCount.value / totalWords.value) * 100) : 0
+)
 </script>
 
 <template>
-  <div class="min-h-screen bg-background flex">
+  <!-- Landing page: no sidebar, full screen -->
+  <div v-if="!showSidebar" class="h-screen bg-black">
+    <RouterView />
+  </div>
+
+  <!-- App layout: sidebar + main -->
+  <div v-else class="flex h-screen overflow-hidden bg-black text-foreground">
     <!-- Left Sidebar -->
     <aside
-      :class="[
-        'bg-sidebar border-r border-sidebar-border flex flex-col shrink-0 transition-all duration-200',
-        collapsed ? 'w-16' : 'w-56'
-      ]"
+      class="flex flex-col shrink-0 transition-all duration-300"
+      :style="{
+        width: collapsed ? '56px' : '220px',
+        background: 'rgba(0,0,0,0.98)',
+        borderRight: '1px solid rgba(255,255,255,0.06)',
+      }"
     >
       <!-- Logo -->
-      <div class="flex items-center gap-2.5 px-4 py-4 border-b border-sidebar-border">
-        <BookOpen class="size-5 text-primary shrink-0" />
-        <span v-if="!collapsed" class="text-base font-semibold tracking-tight text-foreground">Glosso</span>
-        <Badge v-if="!collapsed" variant="secondary" class="ml-0 text-[0.6rem]">Alpha</Badge>
+      <div
+        class="flex items-center gap-2.5 px-4"
+        style="height: 56px; border-bottom: 1px solid rgba(255,255,255,0.05)"
+      >
+        <button
+          class="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          @click="router.push('/')"
+        >
+          <div
+            style="
+              width: 8px;
+              height: 8px;
+              background: #e03030;
+              transform: rotate(45deg);
+              flex-shrink: 0;
+              box-shadow: 0 0 8px rgba(224,48,48,0.5);
+            "
+          />
+          <span
+            v-if="!collapsed"
+            style="
+              font-family: var(--font-display);
+              font-size: 1.05rem;
+              font-weight: 300;
+              letter-spacing: -0.03em;
+              color: #d0d0d0;
+            "
+          >glosso</span>
+        </button>
       </div>
 
       <!-- Navigation -->
-      <nav class="flex flex-col gap-1 px-2 py-3">
-        <RouterLink
-          to="/"
-          :class="[
-            'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
-            'text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-foreground'
-          ]"
-        >
-          <Home class="size-4 shrink-0" />
-          <span v-if="!collapsed">Home</span>
-        </RouterLink>
+      <div class="flex-1 overflow-y-auto py-3">
+        <p
+          v-if="!collapsed"
+          style="
+            font-size: 0.58rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #2a2a2a;
+            padding: 0 16px;
+            margin-bottom: 8px;
+            font-family: var(--font-mono);
+          "
+        >Navigation</p>
+
         <RouterLink
           to="/library"
-          :class="[
-            'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
-            'text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-foreground'
-          ]"
+          v-slot="{ isActive }"
+          custom
         >
-          <Library class="size-4 shrink-0" />
-          <span v-if="!collapsed">Library</span>
+          <button
+            class="flex w-full items-center gap-3 px-4 py-2.5 transition-all duration-150"
+            :style="{
+              background: isActive ? 'rgba(255,255,255,0.04)' : 'transparent',
+              borderLeft: isActive ? '1px solid rgba(224,48,48,0.7)' : '1px solid transparent',
+            }"
+            @click="router.push('/library')"
+          >
+            <span
+              style="
+                font-family: var(--font-mono);
+                font-size: 0.62rem;
+                flex-shrink: 0;
+                width: 16px;
+                text-align: right;
+              "
+              :style="{ color: isActive ? '#e03030' : '#2a2a2a' }"
+            >01</span>
+            <span
+              v-if="!collapsed"
+              class="truncate"
+              style="font-size: 0.75rem"
+              :style="{
+                color: isActive ? '#e8e8e8' : '#4a4a4a',
+                fontWeight: isActive ? 500 : 400,
+              }"
+            >Library</span>
+          </button>
         </RouterLink>
-      </nav>
 
-      <!-- Language Selector -->
-      <div v-if="!collapsed" class="px-4 py-2">
-        <p class="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Translate to</p>
-        <LanguageSelector />
+        <RouterLink
+          to="/reader"
+          v-slot="{ isActive }"
+          custom
+        >
+          <button
+            class="flex w-full items-center gap-3 px-4 py-2.5 transition-all duration-150"
+            :style="{
+              background: isActive ? 'rgba(255,255,255,0.04)' : 'transparent',
+              borderLeft: isActive ? '1px solid rgba(224,48,48,0.7)' : '1px solid transparent',
+            }"
+            @click="router.push('/reader')"
+          >
+            <span
+              style="
+                font-family: var(--font-mono);
+                font-size: 0.62rem;
+                flex-shrink: 0;
+                width: 16px;
+                text-align: right;
+              "
+              :style="{ color: isActive ? '#e03030' : '#2a2a2a' }"
+            >02</span>
+            <span
+              v-if="!collapsed"
+              class="truncate"
+              style="font-size: 0.75rem"
+              :style="{
+                color: isActive ? '#e8e8e8' : '#4a4a4a',
+                fontWeight: isActive ? 500 : 400,
+              }"
+            >Reader</span>
+          </button>
+        </RouterLink>
       </div>
 
       <!-- Progress -->
-      <div v-if="!collapsed" class="px-4 py-3 mt-auto border-t border-sidebar-border">
-        <p class="text-[0.65rem] uppercase tracking-wider text-muted-foreground mb-2">Word Progress</p>
-        <div class="flex gap-2 text-center">
-          <div class="flex-1">
-            <div class="text-sm font-semibold text-[var(--word-new)]">{{ newCount }}</div>
-            <div class="text-[0.55rem] text-muted-foreground">New</div>
-          </div>
-          <div class="flex-1">
-            <div class="text-sm font-semibold text-[var(--word-learning)]">{{ learningCount }}</div>
-            <div class="text-[0.55rem] text-muted-foreground">Learning</div>
-          </div>
-          <div class="flex-1">
-            <div class="text-sm font-semibold text-[var(--word-known)]">{{ knownCount }}</div>
-            <div class="text-[0.55rem] text-muted-foreground">Known</div>
-          </div>
+      <div
+        v-if="!collapsed && totalWords > 0"
+        style="padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.04)"
+      >
+        <div class="flex items-center gap-1.5 mb-2">
+          <BarChart2 :size="11" style="color: #333333" />
+          <span
+            style="
+              font-size: 0.6rem;
+              color: #2a2a2a;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              font-family: var(--font-mono);
+            "
+          >Progress</span>
         </div>
+        <div
+          style="
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 1px;
+            overflow: hidden;
+          "
+        >
+          <div
+            style="height: 100%; background: #e03030; transition: width 0.5s ease; box-shadow: 0 0 6px rgba(224,48,48,0.4)"
+            :style="{ width: knownPercent + '%' }"
+          />
+        </div>
+        <p
+          style="
+            margin-top: 6px;
+            font-size: 0.58rem;
+            color: #1e1e1e;
+            font-family: var(--font-mono);
+          "
+        >{{ knownCount }} known · {{ learningCount }} learning · {{ totalWords }} total</p>
       </div>
 
       <!-- Bottom actions -->
-      <div class="px-2 py-2 border-t border-sidebar-border flex items-center" :class="collapsed ? 'flex-col gap-1' : 'gap-1'">
+      <div
+        class="flex items-center gap-1 p-2"
+        style="border-top: 1px solid rgba(255,255,255,0.04)"
+      >
         <button
-          v-if="!collapsed"
-          class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
+          class="sidebar-icon-btn flex h-8 w-8 items-center justify-center rounded transition-colors"
+          @click="toggle"
         >
-          <Settings class="size-3.5" />
-          <span>Settings</span>
+          <PanelLeftOpen v-if="collapsed" :size="14" />
+          <PanelLeftClose v-else :size="14" />
         </button>
-        <button
-          v-if="!collapsed"
-          class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
-        >
-          <HelpCircle class="size-3.5" />
-          <span>Help</span>
-        </button>
-        <button
-          class="rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
-          :class="collapsed ? '' : 'ml-auto'"
-          @click="collapsed = !collapsed"
-          :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-        >
-          <PanelLeft v-if="collapsed" class="size-4" />
-          <PanelLeftClose v-else class="size-4" />
-        </button>
+        <template v-if="!collapsed">
+          <button
+            class="sidebar-icon-btn flex h-8 w-8 items-center justify-center rounded transition-colors"
+            title="Settings (S)"
+            @click="openSettings('settings')"
+          >
+            <Settings :size="13" />
+          </button>
+          <button
+            class="sidebar-icon-btn flex h-8 w-8 items-center justify-center rounded transition-colors"
+            title="Help (H)"
+            @click="openSettings('help')"
+          >
+            <HelpCircle :size="13" />
+          </button>
+        </template>
       </div>
     </aside>
 
     <!-- Main content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col overflow-hidden bg-black">
       <RouterView />
     </div>
+
+    <!-- Settings Modal -->
+    <SettingsPanel
+      :is-open="settingsOpen"
+      :active-tab="settingsTab"
+      @close="closeSettings"
+    />
   </div>
 </template>
+
+<style scoped>
+.sidebar-icon-btn {
+  color: #2a2a2a;
+}
+.sidebar-icon-btn:hover {
+  color: #888888;
+}
+</style>

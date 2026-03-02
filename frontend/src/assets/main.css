@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -6,48 +6,54 @@
 
 :root {
   --font-size: 16px;
+  --font-primary: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
-  --background: #0f1117;
-  --foreground: #e1e4ea;
-  --card: #181a22;
-  --card-foreground: #e1e4ea;
-  --popover: #1e2029;
-  --popover-foreground: #e1e4ea;
-  --primary: #6c8cff;
-  --primary-foreground: #0f1117;
-  --secondary: #1e2029;
-  --secondary-foreground: #a8b1c4;
-  --muted: #1a1c24;
-  --muted-foreground: #6b7280;
-  --accent: #4ade80;
-  --accent-foreground: #0f1117;
-  --destructive: #ef4444;
+  /* Glosso — black/white/red palette */
+  --background: #000000;
+  --foreground: #f0f0f0;
+  --card: rgba(255, 255, 255, 0.03);
+  --card-foreground: #f0f0f0;
+  --popover: rgba(6, 6, 6, 0.97);
+  --popover-foreground: #f0f0f0;
+  --primary: #e03030;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary-foreground: #888888;
+  --muted: rgba(255, 255, 255, 0.025);
+  --muted-foreground: #444444;
+  --accent: #e03030;
+  --accent-foreground: #ffffff;
+  --destructive: #e03030;
   --destructive-foreground: #ffffff;
-  --border: rgba(108, 140, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.07);
   --input: transparent;
-  --input-background: #1a1c24;
-  --switch-background: #2a2c34;
-  --ring: #6c8cff;
-  --chart-1: #6c8cff;
-  --chart-2: #4ade80;
-  --chart-3: #f59e0b;
-  --chart-4: #ec4899;
-  --chart-5: #8b5cf6;
+  --input-background: rgba(255, 255, 255, 0.04);
+  --switch-background: rgba(255, 255, 255, 0.1);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: rgba(224, 48, 48, 0.4);
+  --chart-1: #e03030;
+  --chart-2: #ffffff;
+  --chart-3: #888888;
+  --chart-4: #555555;
+  --chart-5: #333333;
   --radius: 0.5rem;
-  --sidebar: #13151d;
-  --sidebar-foreground: #e1e4ea;
-  --sidebar-primary: #6c8cff;
-  --sidebar-primary-foreground: #0f1117;
-  --sidebar-accent: #1e2029;
-  --sidebar-accent-foreground: #a8b1c4;
-  --sidebar-border: rgba(108, 140, 255, 0.1);
-  --sidebar-ring: #6c8cff;
+  --sidebar: rgba(0, 0, 0, 0.98);
+  --sidebar-foreground: #f0f0f0;
+  --sidebar-primary: #e03030;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.04);
+  --sidebar-accent-foreground: #888888;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #e03030;
 
   /* Word status tokens */
-  --word-new: #6c8cff;
-  --word-known: #4ade80;
-  --word-learning: #f59e0b;
-  --word-hover: rgba(108, 140, 255, 0.15);
+  --word-new: rgba(255, 255, 255, 0.55);
+  --word-known: rgba(255, 255, 255, 0.18);
+  --word-learning: #e03030;
+  --word-hover: rgba(255, 255, 255, 0.06);
 }
 
 @theme inline {
@@ -98,45 +104,42 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-primary);
+    font-weight: 400;
   }
 
   html {
     font-size: var(--font-size);
   }
 
-  h1 {
-    font-weight: 600;
-    line-height: 1.5;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
   }
 
-  h2 {
-    font-weight: 600;
-    line-height: 1.5;
-  }
-
-  h3 {
-    font-weight: 600;
-    line-height: 1.5;
-  }
-
-  h4 {
-    font-weight: 600;
-    line-height: 1.5;
-  }
+  h1 { line-height: 1.3; }
+  h2 { line-height: 1.4; }
+  h3 { line-height: 1.5; }
 
   label {
-    font-weight: 600;
+    font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   button {
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   input {
-    font-weight: 400;
+    font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+}
+
+/* Popup animation */
+@keyframes popupFadeIn {
+  from { opacity: 0; transform: translate(-50%, -96%); }
+  to { opacity: 1; transform: translate(-50%, -100%); }
 }
