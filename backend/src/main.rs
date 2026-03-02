@@ -16,6 +16,8 @@ const WORDS_PER_PAGE: usize =200;
 struct UploadResponse {
     title: String,
     pages: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    gutenberg_info: Option<String>,
 }
 
 async fn upload(mut multipart: Multipart) -> Result<Json<UploadResponse>, String> {
@@ -38,7 +40,37 @@ async fn upload(mut multipart: Multipart) -> Result<Json<UploadResponse>, String
         }
     }
 
-    Ok(Json(UploadResponse { title, pages }))
+    Ok(Json(UploadResponse { title, pages, gutenberg_info: None }))
+}
+
+/// Splits a raw Gutenberg text into (body, gutenberg_info).
+/// Body = content between the START / END markers.
+/// gutenberg_info = preamble + postamble joined together.
+fn strip_gutenberg(text: &str) -> (String, Option<String>) {
+    let lower = text.to_lowercase();
+
+    let start_pos = lower.find("*** start of the project gutenberg")
+        .or_else(|| lower.find("***start of the project gutenberg"))
+        .and_then(|pos| text[pos..].find('\n').map(|nl| pos + nl + 1));
+
+    let end_pos = lower.find("*** end of the project gutenberg")
+        .or_else(|| lower.find("***end of the project gutenberg"));
+
+    match (start_pos, end_pos) {
+        (Some(start), Some(end)) if start < end => {
+            let preamble = text[..start].trim().to_string();
+            let body = text[start..end].trim().to_string();
+            let postamble = text[end..].trim().to_string();
+            let info = format!("{}\n\n---\n\n{}", preamble, postamble);
+            (body, Some(info))
+        }
+        (Some(start), None) => {
+            let preamble = text[..start].trim().to_string();
+            let body = text[start..].trim().to_string();
+            (body, Some(preamble))
+        }
+        _ => (text.to_string(), None),
+    }
 }
 
 fn split_into_pages(text: &str) -> Vec<String> {
@@ -205,11 +237,13 @@ async fn gutenberg_import(
         .await
         .map_err(|e| e.to_string())?;
 
-    let pages = split_into_pages(&text);
+    let (body, gutenberg_info) = strip_gutenberg(&text);
+    let pages = split_into_pages(&body);
 
     Ok(Json(UploadResponse {
         title: book.title,
         pages,
+        gutenberg_info,
     }))
 }
 

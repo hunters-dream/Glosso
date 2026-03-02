@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, Info, X } from 'lucide-vue-next'
 import WordToken from '@/components/WordToken.vue'
 import TranslationBubble from '@/components/TranslationBubble.vue'
 import WordBank from '@/components/WordBank.vue'
@@ -18,6 +18,7 @@ const { addWord, isWordSaved, getWordStatus } = useWords()
 const { openSettings } = useSettings()
 
 const currentPage = ref(0)
+const showInfo = ref(false)
 const selectedWord = ref(null)
 const translation = ref(null)
 const translating = ref(false)
@@ -134,15 +135,27 @@ function nextPage() {
           >{{ book.title }}</span>
         </div>
 
-        <span
-          style="
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            color: #2a2a2a;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-          "
-        >{{ wordCount }} words · click to translate</span>
+        <div class="flex items-center gap-3">
+          <span
+            style="
+              font-family: var(--font-mono);
+              font-size: 0.6rem;
+              color: #2a2a2a;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+            "
+          >{{ wordCount }} words · click to translate</span>
+
+          <button
+            v-if="book.gutenberg_info"
+            class="info-btn"
+            :class="{ 'info-btn--active': showInfo }"
+            title="Book info"
+            @click="showInfo = !showInfo"
+          >
+            <Info :size="13" />
+          </button>
+        </div>
       </div>
 
       <!-- Scroll + side nav wrapper -->
@@ -203,6 +216,21 @@ function nextPage() {
           <ChevronRight :size="18" />
         </button>
       </div>
+
+      <!-- Gutenberg info panel -->
+      <Transition name="info-panel">
+        <div v-if="showInfo" class="info-panel">
+          <div class="info-panel-header">
+            <span class="info-panel-title">Book Info</span>
+            <button class="info-panel-close" @click="showInfo = false">
+              <X :size="13" />
+            </button>
+          </div>
+          <div class="info-panel-body wordbank-scroll">
+            <pre class="info-panel-text">{{ book.gutenberg_info }}</pre>
+          </div>
+        </div>
+      </Transition>
 
       <!-- Bottom slider bar -->
       <div class="slider-bar">
@@ -402,5 +430,114 @@ function nextPage() {
 .page-slider:focus::-webkit-slider-thumb {
   transform: scale(1.3);
   box-shadow: 0 0 14px rgba(224,48,48,0.6);
+}
+
+/* ── Info button ── */
+.info-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  color: #2a2a2a;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.info-btn:hover {
+  color: #888;
+  border-color: rgba(255,255,255,0.12);
+}
+
+.info-btn--active {
+  color: #e03030;
+  border-color: rgba(224,48,48,0.3);
+  background: rgba(224,48,48,0.06);
+}
+
+/* ── Info panel ── */
+.info-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 52px; /* above the slider bar */
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(8,8,8,0.97);
+  border-left: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(16px);
+  z-index: 10;
+}
+
+.info-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  flex-shrink: 0;
+}
+
+.info-panel-title {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: #2a2a2a;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.info-panel-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  border: none;
+  background: transparent;
+  color: #2a2a2a;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.info-panel-close:hover {
+  color: #e03030;
+}
+
+.info-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.06) transparent;
+}
+
+.info-panel-body::-webkit-scrollbar { width: 3px; }
+.info-panel-body::-webkit-scrollbar-track { background: transparent; }
+.info-panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 2px; }
+.info-panel-body::-webkit-scrollbar-thumb:hover { background: rgba(224,48,48,0.4); }
+
+.info-panel-text {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: #2a2a2a;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── Transition ── */
+.info-panel-enter-active,
+.info-panel-leave-active {
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+.info-panel-enter-from,
+.info-panel-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
 }
 </style>
