@@ -8,18 +8,18 @@ const canvasRef = ref(null)
 let animationId = 0
 let particles = []
 
-function createParticle(cx, cy) {
+function createParticle(w, h) {
   const angle = Math.random() * Math.PI * 2
-  const speed = 0.25 + Math.random() * 0.6
-  const maxLife = 180 + Math.random() * 260
+  const speed = 0.15 + Math.random() * 0.45
+  const maxLife = 250 + Math.random() * 350
   return {
-    x: cx + (Math.random() - 0.5) * 80,
-    y: cy + (Math.random() - 0.5) * 28,
+    x: Math.random() * w,
+    y: Math.random() * h,
     vx: Math.cos(angle) * speed,
     vy: Math.sin(angle) * speed,
-    size: 0.6 + Math.random() * 1.4,
+    size: 0.5 + Math.random() * 1.6,
     opacity: 0,
-    maxOpacity: 0.08 + Math.random() * 0.25,
+    maxOpacity: 0.06 + Math.random() * 0.22,
     life: 0,
     maxLife,
     isRed: Math.random() < 0.08,
@@ -47,14 +47,12 @@ onMounted(() => {
   window.addEventListener('resize', handleResize)
   window.addEventListener('keydown', handleKeyDown)
 
-  const cx = window.innerWidth / 2
-  const cy = window.innerHeight / 2
+  const w = window.innerWidth
+  const h = window.innerHeight
 
-  particles = Array.from({ length: 100 }, () => {
-    const p = createParticle(cx, cy)
+  particles = Array.from({ length: 180 }, () => {
+    const p = createParticle(w, h)
     p.life = Math.floor(Math.random() * p.maxLife)
-    p.x += p.vx * p.life
-    p.y += p.vy * p.life
     return p
   })
 
@@ -62,16 +60,13 @@ onMounted(() => {
     if (!canvas || !ctx) return
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    const centerX = canvas.width / 2
-    const centerY = canvas.height / 2
-
     particles.forEach((p, i) => {
       p.x += p.vx
       p.y += p.vy
       p.life++
 
-      const fadeIn = 40
-      const fadeOut = 60
+      const fadeIn = 50
+      const fadeOut = 80
       if (p.life < fadeIn) {
         p.opacity = (p.life / fadeIn) * p.maxOpacity
       } else if (p.life > p.maxLife - fadeOut) {
@@ -81,7 +76,7 @@ onMounted(() => {
       }
 
       if (p.life >= p.maxLife) {
-        particles[i] = createParticle(centerX, centerY)
+        particles[i] = createParticle(canvas.width, canvas.height)
       }
 
       ctx.beginPath()
@@ -122,48 +117,42 @@ function startReading() {
     <div
       class="pointer-events-none absolute rounded-full"
       style="
-        width: 600px;
-        height: 600px;
-        background: radial-gradient(circle, rgba(255,255,255,0.022) 0%, transparent 70%);
+        width: 900px;
+        height: 900px;
+        background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 65%);
         z-index: 1;
       "
     />
 
     <!-- Main content -->
     <div class="relative flex flex-col items-center select-none" style="z-index: 2">
-      <!-- Logo -->
-      <div class="mb-6 flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center">
-          <div
-            style="
-              width: 10px;
-              height: 10px;
-              background: #e03030;
-              transform: rotate(45deg);
-              box-shadow: 0 0 12px rgba(224,48,48,0.6);
-            "
-          />
-        </div>
-        <h1
+      <!-- Diamond mark -->
+      <div class="mb-8">
+        <div
           style="
-            font-family: var(--font-display);
-            font-size: 3.2rem;
-            font-weight: 300;
-            letter-spacing: -0.04em;
-            color: #f0f0f0;
-            line-height: 1;
+            width: 16px;
+            height: 16px;
+            background: #e03030;
+            transform: rotate(45deg);
+            box-shadow: 0 0 20px rgba(224,48,48,0.6), 0 0 60px rgba(224,48,48,0.15);
           "
-        >glosso</h1>
+        />
       </div>
+
+      <!-- Logo text -->
+      <h1
+        class="landing-logo"
+      >glosso</h1>
 
       <!-- Domain -->
       <p
         style="
           font-family: var(--font-mono);
-          font-size: 0.68rem;
+          font-size: 0.72rem;
           color: #2a2a2a;
-          letter-spacing: 0.12em;
-          margin-bottom: 2.5rem;
+          letter-spacing: 0.14em;
+          margin-top: 1rem;
+          margin-bottom: 3rem;
         "
       >glosso.space</p>
 
@@ -171,9 +160,9 @@ function startReading() {
       <div
         style="
           width: 1px;
-          height: 36px;
+          height: 48px;
           background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.12), transparent);
-          margin-bottom: 2rem;
+          margin-bottom: 2.5rem;
         "
       />
 
@@ -181,11 +170,11 @@ function startReading() {
       <p
         style="
           font-family: var(--font-primary);
-          font-size: 0.88rem;
+          font-size: 0.92rem;
           color: #333333;
-          letter-spacing: 0.06em;
+          letter-spacing: 0.08em;
           text-align: center;
-          margin-bottom: 3rem;
+          margin-bottom: 3.5rem;
           text-transform: uppercase;
         "
       >Read. Discover. Remember.</p>
@@ -247,6 +236,15 @@ function startReading() {
 </template>
 
 <style scoped>
+.landing-logo {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 10vw, 7rem);
+  font-weight: 300;
+  letter-spacing: -0.05em;
+  color: #f0f0f0;
+  line-height: 1;
+}
+
 .landing-cta {
   font-family: var(--font-display);
   font-size: 0.78rem;
