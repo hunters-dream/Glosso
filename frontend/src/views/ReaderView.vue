@@ -43,6 +43,10 @@ function handleKeyDown(e) {
 const pageText = computed(() => book.value?.pages[currentPage.value] ?? '')
 const totalPages = computed(() => book.value?.pages.length ?? 0)
 const wordCount = computed(() => pageText.value.split(/\s+/).filter(Boolean).length)
+const sliderPage = computed({
+  get: () => currentPage.value,
+  set: (v) => { currentPage.value = Number(v); closeBubble() }
+})
 
 function tokenize(text) {
   return text.split(/([A-Za-zÀ-ÖØ-öø-ÿÄÖÜäöüß]+)/).filter(t => t !== '')
@@ -98,10 +102,11 @@ function nextPage() {
 <template>
   <div v-if="book" class="flex-1 flex overflow-hidden relative">
     <!-- Main reader area -->
-    <main class="flex-1 overflow-y-auto bg-black">
+    <main class="flex-1 flex flex-col overflow-hidden bg-black">
+
       <!-- Top bar -->
       <div
-        class="sticky top-0 flex items-center justify-between px-8 z-10"
+        class="flex items-center justify-between px-8 shrink-0"
         style="
           height: 56px;
           border-bottom: 1px solid rgba(255,255,255,0.04);
@@ -109,96 +114,119 @@ function nextPage() {
           backdrop-filter: blur(12px);
         "
       >
-        <div
+        <div class="flex items-center gap-2">
+          <div
+            style="
+              width: 5px; height: 5px;
+              background: #e03030;
+              transform: rotate(45deg);
+              box-shadow: 0 0 6px rgba(224,48,48,0.4);
+            "
+          />
+          <span
+            style="
+              font-family: var(--font-display);
+              font-size: 0.85rem;
+              font-weight: 400;
+              letter-spacing: -0.01em;
+              color: #d8d8d8;
+            "
+          >{{ book.title }}</span>
+        </div>
+
+        <span
           style="
             font-family: var(--font-mono);
-            font-size: 0.62rem;
-            color: #272727;
+            font-size: 0.6rem;
+            color: #2a2a2a;
             letter-spacing: 0.08em;
             text-transform: uppercase;
           "
-        >Page {{ currentPage + 1 }} / {{ totalPages }}</div>
-
-        <div class="flex items-center gap-2">
-          <button
-            :disabled="currentPage <= 0"
-            class="reader-nav-btn"
-            @click="prevPage"
-          >
-            <ChevronLeft :size="12" />
-            Prev
-          </button>
-          <button
-            :disabled="currentPage >= totalPages - 1"
-            class="reader-nav-btn reader-nav-btn--next"
-            @click="nextPage"
-          >
-            Next
-            <ChevronRight :size="12" />
-          </button>
-        </div>
+        >{{ wordCount }} words · click to translate</span>
       </div>
 
-      <!-- Text content -->
-      <div class="mx-auto max-w-2xl px-8 py-12">
-        <!-- Lesson header -->
-        <div class="mb-10">
-          <div class="flex items-center gap-2 mb-3">
-            <div
-              style="
-                width: 5px;
-                height: 5px;
-                background: #e03030;
-                transform: rotate(45deg);
-                box-shadow: 0 0 6px rgba(224,48,48,0.4);
-              "
-            />
-            <span
-              style="
-                font-family: var(--font-mono);
-                font-size: 0.6rem;
-                color: #2a2a2a;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-              "
-            >Reading</span>
+      <!-- Scroll + side nav wrapper -->
+      <div class="flex-1 flex overflow-hidden relative">
+
+        <!-- Left nav zone -->
+        <button
+          class="side-nav side-nav--left"
+          :class="{ 'side-nav--disabled': currentPage <= 0 }"
+          :disabled="currentPage <= 0"
+          @click="prevPage"
+          aria-label="Previous page"
+        >
+          <ChevronLeft :size="18" />
+        </button>
+
+        <!-- Scrollable text area -->
+        <div class="flex-1 overflow-y-auto">
+          <div class="mx-auto max-w-2xl px-16 py-12">
+            <!-- Lesson header -->
+            <div class="mb-10">
+              <p
+                style="
+                  font-size: 0.72rem;
+                  color: #2a2a2a;
+                  font-family: var(--font-mono);
+                "
+              >Page {{ currentPage + 1 }} / {{ totalPages }}</p>
+            </div>
+
+            <!-- Reading text -->
+            <div style="line-height: 2.1">
+              <p style="color: #b0b0b0; font-size: 1rem">
+                <template v-for="(token, i) in tokenize(pageText)" :key="i">
+                  <WordToken
+                    v-if="isWord(token)"
+                    :word="token"
+                    :active="token === selectedWord"
+                    :status="getWordStatus(token)"
+                    :saved="isWordSaved(token)"
+                    @select="selectWord"
+                  />
+                  <span v-else>{{ token }}</span>
+                </template>
+              </p>
+            </div>
           </div>
-          <h2
-            style="
-              font-family: var(--font-display);
-              font-size: 1.5rem;
-              font-weight: 400;
-              letter-spacing: -0.025em;
-              color: #d8d8d8;
-              margin-bottom: 4px;
-            "
-          >{{ book.title }}</h2>
-          <p
-            style="
-              font-size: 0.72rem;
-              color: #2a2a2a;
-              font-family: var(--font-mono);
-            "
-          >{{ wordCount }} words · click any word to translate</p>
         </div>
 
-        <!-- Reading text -->
-        <div style="line-height: 2.1">
-          <p style="color: #b0b0b0; font-size: 1rem">
-            <template v-for="(token, i) in tokenize(pageText)" :key="i">
-              <WordToken
-                v-if="isWord(token)"
-                :word="token"
-                :active="token === selectedWord"
-                :status="getWordStatus(token)"
-                :saved="isWordSaved(token)"
-                @select="selectWord"
-              />
-              <span v-else>{{ token }}</span>
-            </template>
-          </p>
-        </div>
+        <!-- Right nav zone -->
+        <button
+          class="side-nav side-nav--right"
+          :class="{ 'side-nav--disabled': currentPage >= totalPages - 1 }"
+          :disabled="currentPage >= totalPages - 1"
+          @click="nextPage"
+          aria-label="Next page"
+        >
+          <ChevronRight :size="18" />
+        </button>
       </div>
+
+      <!-- Bottom slider bar -->
+      <div class="slider-bar">
+        <span class="slider-label">{{ currentPage + 1 }}</span>
+
+        <div class="slider-track-wrap">
+          <input
+            v-model="sliderPage"
+            type="range"
+            min="0"
+            :max="totalPages - 1"
+            step="1"
+            class="page-slider"
+          />
+          <!-- Progress fill indicator -->
+          <div
+            class="slider-progress"
+            :style="{ width: totalPages > 1 ? (currentPage / (totalPages - 1) * 100) + '%' : '0%' }"
+          />
+        </div>
+
+        <span class="slider-label">{{ totalPages }}</span>
+      </div>
+
     </main>
 
     <!-- Word Bank sidebar -->
@@ -220,39 +248,159 @@ function nextPage() {
 </template>
 
 <style scoped>
-.reader-nav-btn {
+/* ── Side navigation zones ── */
+.side-nav {
+  position: relative;
   display: flex;
-  height: 28px;
   align-items: center;
-  gap: 6px;
-  border-radius: 4px;
-  padding: 0 12px;
-  font-size: 0.7rem;
-  color: #3a3a3a;
-  border: 1px solid rgba(255,255,255,0.06);
+  justify-content: center;
+  width: 72px;
+  flex-shrink: 0;
   background: transparent;
-  font-family: var(--font-primary);
-  transition: all 0.15s;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,255,255,0.1);
+  transition: color 0.2s, background 0.2s;
+  z-index: 2;
 }
 
-.reader-nav-btn:disabled {
-  opacity: 0.2;
+.side-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.side-nav--left::before {
+  background: linear-gradient(to right, rgba(224,48,48,0.05), transparent);
+}
+
+.side-nav--right::before {
+  background: linear-gradient(to left, rgba(224,48,48,0.05), transparent);
+}
+
+.side-nav:not(.side-nav--disabled):hover {
+  color: rgba(255,255,255,0.35);
+}
+
+.side-nav:not(.side-nav--disabled):hover::before {
+  opacity: 1;
+}
+
+.side-nav:not(.side-nav--disabled):active {
+  color: #e03030;
+}
+
+.side-nav--disabled {
+  opacity: 0.08;
   pointer-events: none;
 }
 
-.reader-nav-btn:not(:disabled):hover {
-  color: #888888;
-  border-color: rgba(255,255,255,0.12);
+/* ── Bottom slider bar ── */
+.slider-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 32px;
+  height: 52px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  background: rgba(0,0,0,0.92);
+  backdrop-filter: blur(12px);
 }
 
-.reader-nav-btn--next {
-  color: #e03030;
-  border-color: rgba(224,48,48,0.3);
+.slider-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: #2a2a2a;
+  letter-spacing: 0.08em;
+  min-width: 24px;
+  text-align: center;
+  user-select: none;
 }
 
-.reader-nav-btn--next:not(:disabled):hover {
-  color: #e03030;
-  background: rgba(224,48,48,0.06);
-  border-color: rgba(224,48,48,0.5);
+.slider-track-wrap {
+  position: relative;
+  flex: 1;
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+/* Progress fill behind the thumb */
+.slider-progress {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1px;
+  background: #e03030;
+  pointer-events: none;
+  transition: width 0.15s;
+  box-shadow: 0 0 6px rgba(224,48,48,0.5);
+}
+
+/* Native range reset + custom styling */
+.page-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+/* Track */
+.page-slider::-webkit-slider-runnable-track {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 1px;
+}
+.page-slider::-moz-range-track {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 1px;
+}
+
+/* Thumb */
+.page-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 1.5px solid #e03030;
+  box-shadow: 0 0 8px rgba(224,48,48,0.4);
+  margin-top: -5.5px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.page-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 1.5px solid #e03030;
+  box-shadow: 0 0 8px rgba(224,48,48,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.page-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.3);
+  box-shadow: 0 0 14px rgba(224,48,48,0.6);
+}
+.page-slider:hover::-moz-range-thumb {
+  transform: scale(1.3);
+  box-shadow: 0 0 14px rgba(224,48,48,0.6);
+}
+
+.page-slider:focus {
+  outline: none;
+}
+.page-slider:focus::-webkit-slider-thumb {
+  transform: scale(1.3);
+  box-shadow: 0 0 14px rgba(224,48,48,0.6);
 }
 </style>

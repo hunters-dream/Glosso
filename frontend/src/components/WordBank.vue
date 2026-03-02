@@ -96,7 +96,7 @@ const nextStatus = { new: 'learning', learning: 'known', known: 'new' }
     </div>
 
     <!-- Words list -->
-    <div class="flex-1 overflow-y-auto" style="padding: 8px">
+    <div class="flex-1 overflow-y-auto wordbank-scroll" style="padding: 8px">
       <!-- Empty state -->
       <div
         v-if="words.length === 0"
@@ -221,5 +221,28 @@ const nextStatus = { new: 'learning', learning: 'known', known: 'new' }
 
 .word-remove-btn:hover {
   color: #e03030;
+}
+
+/* ── Custom scrollbar ── */
+.wordbank-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.06) transparent;
+}
+
+.wordbank-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+
+.wordbank-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wordbank-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+}
+
+.wordbank-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(224,48,48,0.4);
 }
 </style>

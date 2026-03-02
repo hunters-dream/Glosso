@@ -8,7 +8,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use tower_http::cors::{Any, CorsLayer};
 
-const WORDS_PER_PAGE: usize = 300;
+const WORDS_PER_PAGE: usize =200;
 
 // ── Upload ────────────────────────────────────────────────────────────────────
 
